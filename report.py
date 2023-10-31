@@ -2,6 +2,7 @@ from tkinter import*
 from PIL import Image,ImageTk
 from tkinter import ttk,messagebox
 import sqlite3
+import re
 
 class reportClass:
     def __init__(self,root):
@@ -70,8 +71,13 @@ class reportClass:
         con=sqlite3.connect(database="srms.db")
         cur=con.cursor()
         try:
+            valid=re.match("^[0-9]*$", self.var_search.get())
             if self.var_search.get()=="":
                 messagebox.showerror("Error","Roll No. is required",parent=self.root)
+            elif not self.var_search.get().isdigit():
+                messagebox.showerror("Error","Roll No. must be Numeric",parent=self.root)
+            elif self.var_search.get()!=valid and len(self.var_search.get()) != 4:
+                messagebox.showerror("Error","Roll No. must be of 4 digits" ,parent=self.root)
             else:
                 cur.execute(f"select * from result where roll=?",(self.var_search.get(),))
                 row=cur.fetchone()

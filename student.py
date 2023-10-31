@@ -2,6 +2,8 @@ from tkinter import*
 from PIL import Image,ImageTk
 from tkinter import ttk,messagebox
 import sqlite3
+import datetime
+import re
 
 class studentClass:
     def __init__(self,root):
@@ -53,7 +55,15 @@ class studentClass:
         self.txt_roll=Entry(self.root,textvariable=self.var_roll,font=("goudy old style",15,'bold'),bg='lightyellow')
         self.txt_roll.place(x=150,y=60,width=200)
         txt_name=Entry(self.root,textvariable=self.var_name,font=("goudy old style",15,'bold'),bg='lightyellow').place(x=150,y=100,width=200)
-        txt_email=Entry(self.root,textvariable=self.var_email,font=("goudy old style",15,'bold'),bg='lightyellow').place(x=150,y=140,width=200)
+        
+        
+        self.txt_email=Entry(self.root,textvariable=self.var_email,font=("goudy old style",15,'bold'),bg='lightyellow')
+        self.txt_email.place(x=150,y=140,width=200)
+        self.txt_email.bind("<FocusOut>", self.on_email_entry_change)
+
+        self.email_validation_label = Label(self.root, text="", fg="black",bg="white")
+        self.email_validation_label.place(x=250, y=560)
+        
         self.txt_gender=ttk.Combobox(self.root,textvariable=self.var_gender,values=("Male","Female","Others"),font=("goudy old style",15,'bold'),state='readonly',justify=CENTER)
         self.txt_gender.place(x=150,y=180,width=200)
         self.txt_gender.set("Select")
@@ -153,6 +163,19 @@ class studentClass:
 
 # ---------------------------------------------------------------------------
 
+    def validate_email(self, email):
+        # Regular expression
+        pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        return bool(re.match(pattern, email))
+
+    def on_email_entry_change(self, event):
+        email = self.txt_email.get()
+        if self.validate_email(email):
+            self.email_validation_label.config(text="Valid Email", fg="green")
+        else:
+            self.email_validation_label.config(text="Invalid Email", fg="red")
+# ---------------------------------------------------------------------------
+    
     def clear(self):
         self.var_roll.set("")
         self.var_name.set("")
@@ -199,8 +222,31 @@ class studentClass:
         con=sqlite3.connect(database="srms.db")
         cur=con.cursor()
         try:
-            if self.var_roll.get()=="":
-                messagebox.showerror("Error","Roll No. is required",parent=self.root)
+            valid=re.match("^[0-9]*$", self.var_contact.get())
+            ex_len=10;
+            date_format = '%d-%m-%Y'
+            Admit_dateObject = datetime.datetime.strptime(self.var_a_date.get(), date_format)
+            dob_dateObject = datetime.datetime.strptime(self.var_dob.get(), date_format)
+            if self.var_roll.get()=="" or self.var_name.get()=="" or self.var_email.get()=="" or self.var_gender.get()=="Select" or self.var_dob.get()=="" or self.var_contact.get()=="" or self.var_a_date.get()=="" or self.var_course.get()=="Select" or self.var_state.get()=="" or self.var_city.get()=="" or self.var_pin.get()=="" :
+                messagebox.showerror("Error","All Fields are required",parent=self.root)
+            elif not self.var_roll.get().isdigit():
+                messagebox.showerror("Error","Roll No. should be a numeric value" ,parent=self.root)
+            elif self.email_validation_label.cget("text")=="Invalid Email":
+                messagebox.showerror("Error","Invalid Email",parent=self.root)
+            elif not self.var_name.get().isalpha():
+                messagebox.showerror("Error","Name should have alphabets only",parent=self.root)
+            elif not self.var_contact.get().isdigit():
+                messagebox.showerror("Error","Contact should have numbers only" ,parent=self.root)
+            elif len(self.var_contact.get())!=ex_len:
+                messagebox.showerror("Error","Contact should have 10 digits" ,parent=self.root)
+            elif self.var_contact.get()!=valid and len(self.var_contact.get()) != 10:
+                messagebox.showerror("Error","Contact must have 10 digits" ,parent=self.root)
+            elif not self.var_state.get().isalpha():
+                messagebox.showerror("Error","State name should have alphabets only",parent=self.root)
+            elif not self.var_city.get().isalpha():
+                messagebox.showerror("Error","City name should have alphabets only",parent=self.root)
+            elif self.var_pin.get()!=valid and len(self.var_pin.get()) != 6:
+                messagebox.showerror("Error","PIN must be of 6 digits" ,parent=self.root)
             else:
                 cur.execute("select * from student where name=?",(self.var_roll.get(),))
                 row=cur.fetchone()
@@ -232,8 +278,34 @@ class studentClass:
         con=sqlite3.connect(database="srms.db")
         cur=con.cursor()
         try:
-            if self.var_roll.get()=="":
+            # pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+            # v_email=re.match(pattern, self.var_email.get())
+            valid=re.match("^[0-9]*$", self.var_contact.get())
+            ex_len=10;
+            date_format = '%d-%m-%Y'
+            Admit_dateObject = datetime.datetime.strptime(self.var_a_date.get(), date_format)
+            dob_dateObject = datetime.datetime.strptime(self.var_dob.get(), date_format)
+            if self.var_roll.get()=="" or self.var_name.get()=="" or self.var_email.get()=="" or self.var_gender.get()=="Select" or self.var_dob.get()=="" or self.var_contact.get()=="" or self.var_a_date.get()=="" or self.var_course.get()=="Select" or self.var_state.get()=="" or self.var_city.get()=="" or self.var_pin.get()=="" :
                 messagebox.showerror("Error","Enter the details",parent=self.root)
+            elif self.email_validation_label.cget("text")=="Invalid Email":
+                messagebox.showerror("Error","Invalid Email",parent=self.root)
+            # elif self.var_email.get()!=v_email:
+            #     messagebox.showerror("Error","Invalid Email",parent=self.root)
+            elif not self.var_name.get().isalpha():
+                messagebox.showerror("Error","Name should have alphabets only",parent=self.root)
+            elif not self.var_contact.get().isdigit():
+                messagebox.showerror("Error","Contact should have numbers only" ,parent=self.root)
+            # elif len(self.var_contact.get())!=ex_len:
+            #     messagebox.showerror("Error","Contact should have 10 digits" ,parent=self.root)
+            elif self.var_contact.get()!=valid and len(self.var_contact.get()) != 10:
+                messagebox.showerror("Error","Contact must have 10 digits" ,parent=self.root)
+            elif not self.var_state.get().isalpha():
+                messagebox.showerror("Error","State name should have alphabets only",parent=self.root)
+            elif not self.var_city.get().isalpha():
+                messagebox.showerror("Error","City name should have alphabets only",parent=self.root)
+            elif self.var_pin.get()!=valid and len(self.var_pin.get()) != 6:
+                messagebox.showerror("Error","PIN must be of 6 digits" ,parent=self.root)
+            
             else:
                 cur.execute("select * from student where roll=?",(self.var_roll.get(),))
                 row=cur.fetchone()
@@ -322,6 +394,8 @@ class studentClass:
         try:
             if self.var_search.get()=="":
                 messagebox.showerror("Error","Roll No. is required",parent=self.root)
+            elif not self.var_search.get().isdigit():
+                messagebox.showerror("Error","Roll No. must be Numeric",parent=self.root)
             else:
                 cur.execute(f"select * from student where roll=?",(self.var_search.get(),))
                 row=cur.fetchone()
